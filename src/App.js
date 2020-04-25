@@ -34,6 +34,9 @@ function doCalculation(inputString) {
   let opSingleRegex = /[\+\-\*\/]/g;
   let numRegex = /[0-9\.]+/;
   let valueSoFar = inputString.match(startRegex)[0];
+  if (!Regex.test(inputString)) {
+    return inputString;
+  }
   for (let nextOp of inputString.match(Regex)) {
     if (spRegex.test(nextOp)) {
       // console.log("Extra Special", nextOp);
@@ -101,6 +104,7 @@ class Calculator extends React.Component {
     this.clearDisplay = this.clearDisplay.bind(this);
     this.enterOperation = this.enterOperation.bind(this);
     this.doMath = this.doMath.bind(this);
+    this.enterDecimal = this.enterDecimal.bind(this);
   }
 
   clearDisplay() {
@@ -127,9 +131,25 @@ class Calculator extends React.Component {
     });
   }
 
+  enterDecimal() {
+    let numbersRegex = /[0-9\.]+/g;
+    let numbersInDisplay = this.state.displayText.match(numbersRegex);
+    let decimalRegex = /[\.]/;
+    let finalNumber = numbersInDisplay[numbersInDisplay.length - 1];
+    if (!decimalRegex.test(finalNumber)) {
+      this.setState((state) => {
+        return { displayText: state.displayText + "." };
+      });
+    } else {
+      this.setState((state) => {
+        return { displayText: state.displayText };
+      });
+    }
+  }
+
   doMath() {
     this.setState((state) => {
-      return { displayText: doCalculation(state.displayText) };
+      return { displayText: doCalculation(state.displayText).toString() };
     });
   }
 
@@ -166,6 +186,7 @@ class Calculator extends React.Component {
         <Decimal
           symbol={this.state.decimal[1]}
           symName={this.state.decimal[0]}
+          entering={this.enterDecimal}
         />
 
         <Clear
@@ -246,7 +267,9 @@ class Decimal extends React.Component {
   render() {
     return (
       <div id={"div_" + this.props.symName}>
-        <button id={this.props.symName}>{this.props.symbol}</button>
+        <button id={this.props.symName} onClick={this.props.entering}>
+          {this.props.symbol}
+        </button>
       </div>
     );
   }
